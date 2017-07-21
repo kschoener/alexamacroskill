@@ -1,0 +1,4 @@
+./macroSkill/requests/*
+./macroSkill/urllib3/*
+./macroSkill/rauth/*
+./macroSkill/*/*
