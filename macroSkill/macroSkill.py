@@ -93,30 +93,28 @@ def set_food_in_session(intent, session):
     card_title = intent['name']
     session_attributes = {}
     should_end_session = False
+    speech_output = "I'm not sure what food you said. " \
+                        "Please try again."
+    reprompt_text = "Please communicate with me by asking, " \
+                        "what are the macros for broccoli"
 
-    if 'Food' in intent['slots']:
-        food = intent['slots']['Food']['value']
-        session_attributes = create_food_attributes(food)
-        speech_output = "The nutrition facts for " + str(food) + " are " \
-                        + "Calories: " + str(session_attributes["calories"]) + ", " \
-                        + "Fat: " + str(session_attributes["fat"]) + " grams, " \
-                        + "Carbs: " + str(session_attributes["carbs"]) + " grams, and " \
-                        + "Protein: " + str(session_attributes["protein"]) + " grams."
-
+    try:
+        if 'Food' in intent['slots']:
+            food = intent['slots']['Food']['value']
+            session_attributes = create_food_attributes(food)
+            speech_output = "The nutrition facts for " + str(food) + " are " \
+                            + "Calories: " + str(session_attributes["calories"]) + ", " \
+                            + "Fat: " + str(session_attributes["fat"]) + " grams, " \
+                            + "Carbs: " + str(session_attributes["carbs"]) + " grams, and " \
+                            + "Protein: " + str(session_attributes["protein"]) + " grams."
+    except KeyError:
+        print("Found keyerror")
         # speech_output = str(food) + " contains " \
         #                 + str(session_attributes["calories"]) + " calories, " \
         #                 + str(session_attributes["fat"]) + " grams of fat, " \
         #                 + str(session_attributes["carbs"]) + " grams of carbohydrates, and " \
         #                 + str(session_attributes["protein"]) + " grams of protein."
-
-        reprompt_text = "Please communicate with me by asking, " \
-                        "what are the macros for broccoli"
-    else:
-        speech_output = "I'm not sure what food you said. " \
-                        "Please try again."
-        reprompt_text = "I'm not sure what food you said. " \
-                        "Please communicate with me by asking, " \
-                        "what are the macros for broccoli"
+    # endif
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
