@@ -127,12 +127,10 @@ def set_food_in_session(intent, session):
                             + "Protein: " + str(session_attributes["protein"]) + " grams."
     except KeyError:
         print("Found keyerror")
-        # speech_output = str(food) + " contains " \
-        #                 + str(session_attributes["calories"]) + " calories, " \
-        #                 + str(session_attributes["fat"]) + " grams of fat, " \
-        #                 + str(session_attributes["carbs"]) + " grams of carbohydrates, and " \
-        #                 + str(session_attributes["protein"]) + " grams of protein."
-    # endif
+
+    # TODO comment out the print statement
+    # print(speech_output)
+
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
@@ -235,6 +233,5 @@ def lambda_handler(event, context):
         return on_session_ended(event['request'], event['session'])
 
 
-#if __name__ == '__main__':
-#    on_intent({'intent':{'name':"MyFoodIntent", 'slots':{'Food':{'value':'pepperoni pizza'}}}, 
-#                           'requestId':'69'}, {'sessionId':'69'})
+if __name__ == '__main__':
+   on_intent({'intent':{'name':"MyFoodIntent", 'slots':{'Food':{'value':'chicken tofu'}}},'requestId':'69'}, {'sessionId':'69'})
