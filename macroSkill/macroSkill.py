@@ -61,25 +61,41 @@ def handle_session_end_request():
         card_title, speech_output, None, should_end_session))
 
 
-def create_food_attributes(food):
+def create_food_attributes(food, amount, measurement):
     consumer_key = '2430c39a9a3545fe95340690808444f7'
     consumer_secret = '9d60923bee3c4a209b053bcacd8f7159'
     fs = Fatsecret(consumer_key, consumer_secret)
 
-    searchResults = fs.foods_search(str(food), max_results=1)
+    searchResults = fs.foods_search(str(search_phrase), max_results=10)
 
-    theFood = searchResults[0]
+    finalFood = None
 
-    servingTypes = fs.food_get(theFood['food_id'])['servings']['serving']
+    for result in searchResults:
+        servingTypes = fs.food_get(result['food_id'])['servings']['serving']
+
+        if(not measurement or not amount):
+            finalFood = servingTypes[0]
+            break
+        #endif
+
+        for serving in servingTypes:
+            if(not isinstance(serving, str) and measurement in serving['measurement_description'] and int(float(serving['number_of_units'])) == 1):
+                finalFood = serving
+                break
+            #endif
+
+            if(finalFood == None):
+                finalFood = servingTypes[0]
+            #endif
+        # endfor
+    # endfor
 
     fs.close()
 
-    ourServingType = servingTypes[0]
-
-    calories = int(ourServingType['calories'])
-    fat = int(round(float(ourServingType['fat'])))
-    carbs = int(round(float(ourServingType['carbohydrate'])))
-    protein = int(round(float(ourServingType['protein'])))
+    calories = int(int(finalFood['calories']) * (1 if amount == None else (amount/servingSize)))
+    fat = int(round(float(finalFood['fat']) * (1 if amount == None else (amount/servingSize))))
+    carbs = int(round(float(finalFood['carbohydrate']) * (1 if amount == None else (amount/servingSize))))
+    protein = int(round(float(finalFood['protein']) * (1 if amount == None else (amount/servingSize))))
 
     # carbs = str(carbs) + ' grams of carbohydrates'
     # protein = str(protein) + ' grams of protein'
@@ -101,7 +117,9 @@ def set_food_in_session(intent, session):
     try:
         if 'Food' in intent['slots']:
             food = intent['slots']['Food']['value']
-            session_attributes = create_food_attributes(food)
+            amount = intent['slots']['Amount']['value']
+            measurement = intent['slots']['Measurement']['value']
+            session_attributes = create_food_attributes(food, amount, measurement)
             speech_output = "The nutrition facts for " + str(food) + " are " \
                             + "Calories: " + str(session_attributes["calories"]) + ", " \
                             + "Fat: " + str(session_attributes["fat"]) + " grams, " \
